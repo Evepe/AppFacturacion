@@ -1,0 +1,508 @@
+{
+	"info": {
+		"_postman_id": "7cb6c598-8afc-42ee-8096-9afcdbd2d410",
+		"name": "ApiFacturacion",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "32432163"
+	},
+	"item": [
+		{
+			"name": "Cliente Rest",
+			"item": [
+				{
+					"name": "listadoClientes",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"\r",
+									"pm.test(\"Response status code is 404\", function () {\r",
+									"    pm.expect(pm.response.code).to.equal(404);\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Response has the required fields\", function () {\r",
+									"  const responseData = pm.response.json();\r",
+									"  \r",
+									"  pm.expect(responseData).to.be.an('object');\r",
+									"  pm.expect(responseData).to.have.property('timestamp');\r",
+									"  pm.expect(responseData).to.have.property('status');\r",
+									"  pm.expect(responseData).to.have.property('error');\r",
+									"  pm.expect(responseData).to.have.property('path');\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Timestamp is in a valid date format\", function () {\r",
+									"  const responseData = pm.response.json();\r",
+									"  \r",
+									"  pm.expect(responseData).to.be.an('object');\r",
+									"  pm.expect(responseData.timestamp).to.match(/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}.\\d{3}Z$/, \"Timestamp should be in valid date format\");\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Error message is non-empty\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"    \r",
+									"    pm.expect(responseData.error).to.exist.and.to.have.lengthOf.at.least(1, \"Error message should not be empty\");\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Path is a non-empty string\", function () {\r",
+									"  const responseData = pm.response.json();\r",
+									"\r",
+									"  pm.expect(responseData).to.be.an('object');\r",
+									"  pm.expect(responseData.path).to.be.a('string').and.to.have.lengthOf.at.least(1, \"Value should not be empty\");\r",
+									"});\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/facturacion/cliente/listado",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"facturacion",
+								"cliente",
+								"listado"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "altaCliente",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "\r\n{\r\n  \"nombreCliente\": \"Mariela\",\r\n  \"apellidoCliente\": \"Bautisteza\",\r\n  \"dniCliente\": 5326987,\r\n  \"correo_electronico\": \"mari@yahoo.com\"\r\n  \r\n}\r\n\r\n\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/facturacion/cliente/alta",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"facturacion",
+								"cliente",
+								"alta"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "BuscarClientePorId",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"\r",
+									"pm.test(\"Response status code is 500\", function () {\r",
+									"    pm.expect(pm.response.code).to.equal(500);\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Response has the required fields\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"    \r",
+									"    pm.expect(responseData).to.be.an('object');\r",
+									"    pm.expect(responseData.timestamp).to.exist;\r",
+									"    pm.expect(responseData.status).to.exist;\r",
+									"    pm.expect(responseData.error).to.exist;\r",
+									"    pm.expect(responseData.path).to.exist;\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Timestamp is in a valid date format\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"    \r",
+									"    pm.expect(responseData).to.be.an('object');\r",
+									"    pm.expect(responseData.timestamp).to.match(/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}.\\d{3}Z$/, \"Timestamp should be in valid date format\");\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Error message is not empty\", function () {\r",
+									"  const responseData = pm.response.json();\r",
+									"  \r",
+									"  pm.expect(responseData.error).to.exist.and.to.not.be.empty;\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Content-Type header is application/json\", function () {\r",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");\r",
+									"});\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/facturacion/cliente/mostrarporid/5",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"facturacion",
+								"cliente",
+								"mostrarporid",
+								"5"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "BuscarClientePorDni",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/facturacion/cliente/mostrarpordni/36794385",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"facturacion",
+								"cliente",
+								"mostrarpordni",
+								"36794385"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ModificarClientePorId",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n        \"nombreCliente\": \"Evelyn\",\r\n        \"apellidoCliente\": \"Pereyra\",\r\n        \"dniCliente\": 36794385,\r\n        \"correo_electronico\": \"pereyrae582@gmail.com\"\r\n  \r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/facturacion/cliente/modificar/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"facturacion",
+								"cliente",
+								"modificar",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "EliminarCliente",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/facturacion/cliente/eliminar/4",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"facturacion",
+								"cliente",
+								"eliminar",
+								"4"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Producto Rest",
+			"item": [
+				{
+					"name": "mostrarListadoProd",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/facturacion/producto/mostrar",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"facturacion",
+								"producto",
+								"mostrar"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "agregarProductos",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n   \r\n        \"codigo_producto\": \"TelS001\",\r\n        \"marca\": \"Noblex\",\r\n        \"modelo\": \"Smart-Tv \",\r\n        \"caracteristicas\": \"Pantalla 32 pulgadas- HD\",\r\n        \"stock\":13,\r\n        \"precio\": 300000\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/facturacion/producto/agregar",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"facturacion",
+								"producto",
+								"agregar"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "mostrarProductoPorID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/facturacion/producto/mostrar/6",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"facturacion",
+								"producto",
+								"mostrar",
+								"6"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ModificarProductoPorId",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"codigo_producto\": \"Tel01\",\r\n  \"marca\": \"Xiaomi\",\r\n  \"modelo\": \"Redmi\",\r\n  \"caracteristicas\": \"Memoria interna 125 Gb\",\r\n  \"stock\": 5,\r\n  \"precio\": 350000\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/facturacion/producto/modificar/5",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"facturacion",
+								"producto",
+								"modificar",
+								"5"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "EliminarProductoPorId",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/facturacion/producto/eliminar/6",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"facturacion",
+								"producto",
+								"eliminar",
+								"6"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Venta Rest",
+			"item": [
+				{
+					"name": "CrearVenta",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"cliente\": {\r\n    \"idCliente\": 4\r\n  },\r\n  \"productoList\": [\r\n    {\r\n      \"idProducto\": 2,\r\n      \"cantidadVendida\": 1\r\n    },\r\n    {\r\n      \"idProducto\": 4,\r\n      \"cantidadVendida\": 1\r\n    }\r\n  ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/facturacion/ventas/crear",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"facturacion",
+								"ventas",
+								"crear"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ListadoVentas",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/facturacion/ventas/listadoventa",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"facturacion",
+								"ventas",
+								"listadoventa"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "BuscarVentaId",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/facturacion/ventas/buscarventa/2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"facturacion",
+								"ventas",
+								"buscarventa",
+								"2"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Comprobante",
+			"item": [
+				{
+					"name": "GenerarComprobante",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/facturacion/ventas/comprobante/8",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"facturacion",
+								"ventas",
+								"comprobante",
+								"8"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
