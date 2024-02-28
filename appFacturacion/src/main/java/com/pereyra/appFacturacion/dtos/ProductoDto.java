@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 
 public class ProductoDto {
 
-
+    private Long idProductoDto;
     private String marcaProducto;
 
     private String modeloProducto;
@@ -13,14 +13,28 @@ public class ProductoDto {
 
     private BigDecimal precioUnitario;
 
+    private int cantidadProductoDto;
+
+    private int stock;
+
     public ProductoDto() {
     }
 
-    public ProductoDto(String marcaProducto, String modeloProducto, String caracteristicaProducto, BigDecimal precioUnitario) {
+    public ProductoDto(Long idProductoDto, String marcaProducto, String modeloProducto, String caracteristicaProducto, BigDecimal precioUnitario, int cantidadProductoDto) {
+        this.idProductoDto = idProductoDto;
         this.marcaProducto = marcaProducto;
         this.modeloProducto = modeloProducto;
         this.caracteristicaProducto = caracteristicaProducto;
         this.precioUnitario = precioUnitario;
+        this.cantidadProductoDto = cantidadProductoDto;
+    }
+
+    public Long getIdProductoDto() {
+        return idProductoDto;
+    }
+
+    public void setIdProductoDto(Long idProductoDto) {
+        this.idProductoDto = idProductoDto;
     }
 
     public String getMarcaProducto() {
@@ -53,5 +67,21 @@ public class ProductoDto {
 
     public void setPrecioUnitario(BigDecimal precioUnitario) {
         this.precioUnitario = precioUnitario;
+    }
+
+    public int getCantidadProductoDto() {
+        return cantidadProductoDto;
+    }
+
+    public void setCantidadProductoDto(int cantidadProductoDto) {
+        this.cantidadProductoDto = cantidadProductoDto;
+    }
+
+    public int getStock() {
+        return stock;
+    }
+
+    public void setStock(int stock) {
+        this.stock = stock;
     }
 }

@@ -1,5 +1,7 @@
 package com.pereyra.appFacturacion.service;
 
+import com.pereyra.appFacturacion.dtos.VentaDto;
+import com.pereyra.appFacturacion.dtos.VentaRequestDto;
 import com.pereyra.appFacturacion.entity.Venta;
 import org.springframework.http.ResponseEntity;
 
@@ -17,5 +19,5 @@ public interface VentaService {
 
     public ResponseEntity<?> mostrarVentaPorId(Long idVenta);
 
-
+//    public VentaDto crearVenta(VentaRequestDto ventaRequestDto);
 }

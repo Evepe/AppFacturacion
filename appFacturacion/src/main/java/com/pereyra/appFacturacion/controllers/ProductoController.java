@@ -1,6 +1,9 @@
 package com.pereyra.appFacturacion.controllers;
 
+import com.pereyra.appFacturacion.Requests.PrecioRequest;
+import com.pereyra.appFacturacion.Requests.StockRequest;
 import com.pereyra.appFacturacion.entity.Producto;
+import com.pereyra.appFacturacion.entity.ProductoVersion;
 import com.pereyra.appFacturacion.service.ClienteServiceImpl;
 import com.pereyra.appFacturacion.service.ProductoService;
 import org.slf4j.Logger;
@@ -26,24 +29,13 @@ public class ProductoController {
     private ProductoService productoService;
 
     @PostMapping("/agregar")
-    public ResponseEntity<String> agregarProducto(@Valid @RequestBody Producto producto) {
+    public ResponseEntity<?> agregarProducto(@Valid @RequestBody Producto producto) {
         return productoService.crearProducto(producto);
     }
 
     @GetMapping("/mostrar")
     public ResponseEntity<?> mostrarProductos() {
-        try {
-            List<Producto> productosList = productoService.mostrarListadoProducto();
-            if(!productosList.isEmpty()){
-                return ResponseEntity.ok(productosList);
-            } else{
-                return ResponseEntity.ok("Aun no se almacenaron productos");
-            }
-
-        } catch (Exception e) {
-            log.error("Error al mostrar productos", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno al mostrar productos");
-        }
+        return productoService.mostrarListadoProducto();
     }
 
     @GetMapping("/mostrar/{idProducto}")
@@ -52,8 +44,25 @@ public class ProductoController {
     }
 
     @PutMapping("/modificar/{idProducto}")
-    public ResponseEntity <String> modificarProducto(@PathVariable Long idProducto,@Valid @RequestBody Producto producto){
+    public ResponseEntity <?> modificarProducto(@PathVariable Long idProducto,@Valid @RequestBody Producto producto){
         return productoService.modificarProductoPorId(idProducto, producto);
+    }
+
+    @PutMapping("/modificar/stock/{idProducto}")
+    public ResponseEntity <String> modificarStockProducto(@PathVariable Long idProducto, @RequestBody StockRequest request){
+        return productoService.modificarStockProductoPorId(idProducto, request.getStock());
+
+    }
+
+    @PutMapping ("/modificar/precio/{idProducto}")
+    public ResponseEntity <String> modificarPrecioProducto(@PathVariable Long idProducto, @RequestBody PrecioRequest request){
+        return productoService.modificarPrecioProductoPorId(idProducto, request.getPrecio());
+    }
+
+    @GetMapping ("mostrar/versiones/{idProducto}")
+    public ResponseEntity <?> mostrarVersiones(@PathVariable Long idProducto){
+       ;
+        return ResponseEntity.ok().body( productoService.mostrarVersionesProducto(idProducto));
     }
 
     @DeleteMapping("/eliminar/{idProducto}")

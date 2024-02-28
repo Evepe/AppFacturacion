@@ -29,13 +29,8 @@ public class ClienteController {
 
     @GetMapping("/listado")
     public ResponseEntity<?> mostrarClientes() {
-        try {
-            List<Cliente> clientes = clienteService.mostrarClientes();
-            return ResponseEntity.ok(clientes);
+        return clienteService.mostrarCliente();
 
-        } catch (DataAccessException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error inesperado");
-        }
     }
 
     @GetMapping("/mostrarporid/{idCliente}")
@@ -64,5 +59,7 @@ public class ClienteController {
     public ResponseEntity <?> eliminarCliente(@PathVariable Long idCliente){
         return clienteService.eliminarClientePorId(idCliente);
     }
+
+
 
 }

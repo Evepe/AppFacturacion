@@ -1,6 +1,10 @@
 package com.pereyra.appFacturacion.controllers;
 
+import com.pereyra.appFacturacion.dtos.ComprobanteDto;
+import com.pereyra.appFacturacion.dtos.VentaDto;
+import com.pereyra.appFacturacion.dtos.VentaRequestDto;
 import com.pereyra.appFacturacion.entity.Venta;
+import com.pereyra.appFacturacion.service.ComprobanteService;
 import com.pereyra.appFacturacion.service.VentaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -20,13 +24,18 @@ public class VentaController {
     @Autowired
     private VentaService ventaService;
 
+    @Autowired
+    private ComprobanteService comprobanteService;
+
 
     @PostMapping("/crear")
 
     public ResponseEntity<?> agregarVenta(@RequestBody Venta venta) {
         try {
-            Venta ventaCreada = ventaService.agregarVenta(venta);
-            return ResponseEntity.ok(ventaCreada);
+           Venta ventaGuardada= ventaService.agregarVenta(venta);
+           // ComprobanteDto comprobanteDto=comprobanteService.generarComprobante(venta);
+
+            return ResponseEntity.ok(ventaGuardada);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Error al crear la venta: " + e.getMessage());
         }

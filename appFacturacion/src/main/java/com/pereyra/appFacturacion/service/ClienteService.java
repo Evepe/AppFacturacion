@@ -1,5 +1,6 @@
 package com.pereyra.appFacturacion.service;
 
+import com.pereyra.appFacturacion.dtos.ClienteDto;
 import com.pereyra.appFacturacion.entity.Cliente;
 import org.springframework.http.ResponseEntity;
 
@@ -17,12 +18,12 @@ public interface ClienteService {
      * @return ResponseEntity devuelve resultado de la operacion
      */
     public ResponseEntity<String> agregarCliente(Cliente cliente);
-
+    public ClienteDto obtenerClientePorId(Long idCliente);
     /**
      * Muestra los clientes existentes en el sistema
      * @return List listado de clientes
      */
-    public List<Cliente> mostrarClientes();
+    public ResponseEntity <?> mostrarCliente();
 
     /**
      * Modifica determinado cliente
@@ -51,5 +52,5 @@ public interface ClienteService {
      * @param dniCliente Dni de cliente(Valor unico)
      * @return ResponseEntity devuelve resultado de la operacion
      */
-    public ResponseEntity<String> buscarClientePorDni(int dniCliente);
+    public ResponseEntity<?> buscarClientePorDni(int dniCliente);
 }

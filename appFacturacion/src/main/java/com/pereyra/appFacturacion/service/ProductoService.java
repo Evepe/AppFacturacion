@@ -1,8 +1,11 @@
 package com.pereyra.appFacturacion.service;
 
+import com.pereyra.appFacturacion.dtos.ClienteDto;
 import com.pereyra.appFacturacion.entity.Producto;
+import com.pereyra.appFacturacion.entity.ProductoVersion;
 import org.springframework.http.ResponseEntity;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -15,13 +18,13 @@ public interface ProductoService {
      * @param producto entidad producto
      * @return ResponseEntity con un mensaje indicando resultado de la transaccion
      */
-    public ResponseEntity<String> crearProducto(Producto producto);
+    public ResponseEntity<?> crearProducto(Producto producto);
 
     /**
      * Muestra lista de productos existentes en el sistema
      * @return List lista de Productos
      */
-    public List<Producto> mostrarListadoProducto();
+    public ResponseEntity <?> mostrarListadoProducto();
 
     /**
      * Muestra producto determinado por Id
@@ -37,7 +40,7 @@ public interface ProductoService {
      * @return ResponseEntity con un mensaje indicando resultado de la transaccion
      */
 
-    public ResponseEntity<String> modificarProductoPorId(Long idProducto, Producto producto);
+    ResponseEntity<?> modificarProductoPorId(Long idProducto, Producto producto);
 
     /**
      * Elimina producto por Id
@@ -45,4 +48,14 @@ public interface ProductoService {
      * @return ResponseEntity con un mensaje indicando resultado de la transaccion
      */
     public ResponseEntity <String> eliminarProductoPorId(Long idProducto);
+
+
+
+    public ResponseEntity<String> modificarPrecioProductoPorId(Long idProducto, BigDecimal precioProducto);
+
+    public ResponseEntity<String> modificarStockProductoPorId(Long idProducto, int stock);
+
+    public List <ProductoVersion> mostrarVersionesProducto(Long idProducto);
+
+
 }

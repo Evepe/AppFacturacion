@@ -1,6 +1,7 @@
 package com.pereyra.appFacturacion.dtos;
 
 import com.pereyra.appFacturacion.entity.Producto;
+import com.pereyra.appFacturacion.entity.Venta;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -8,90 +9,42 @@ import java.util.List;
 
 public class ComprobanteDto {
 
-    private Long idVentas;
+    private ClienteDto cliente;
 
-    private String fecha;
+    private List <ProductoDto> productoDto;
 
-    private String nombreCliente;
-
-    private String apellidoCliente;
-
-    private int dniCliente;
-
-    private List<ProductoDto> productos;
-
-    private BigDecimal totalCompra;
-
-
+    private VentaDto ventaDto;
 
     public ComprobanteDto() {
     }
 
-    public ComprobanteDto(Long idVentas, String fecha, String nombreCliente, String apellidoCliente, int dniCliente, BigDecimal totalCompra, String marcaProducto, String modeloProducto, String caracteristicaProducto) {
-        this.idVentas = idVentas;
-        this.fecha = fecha;
-        this.nombreCliente = nombreCliente;
-        this.apellidoCliente = apellidoCliente;
-        this.dniCliente = dniCliente;
-        this.totalCompra = totalCompra;
+    public ComprobanteDto(ClienteDto cliente, List<ProductoDto> productoDto, VentaDto ventaDto) {
+        this.cliente = cliente;
+        this.productoDto = productoDto;
+        this.ventaDto = ventaDto;
     }
 
-
-
-    public Long getIdVentas() {
-        return idVentas;
+    public ClienteDto getCliente() {
+        return cliente;
     }
 
-    public void setIdVentas(Long idVentas) {
-        this.idVentas = idVentas;
+    public void setCliente(ClienteDto cliente) {
+        this.cliente = cliente;
     }
 
-    public String getFecha() {
-        return fecha;
+    public List<ProductoDto> getProductoDto() {
+        return productoDto;
     }
 
-    public void setFecha(String fecha) {
-        this.fecha = fecha;
+    public void setProductoDto(List<ProductoDto> productoDto) {
+        this.productoDto = productoDto;
     }
 
-    public String getNombreCliente() {
-        return nombreCliente;
+    public VentaDto getVentaDto() {
+        return ventaDto;
     }
 
-    public void setNombreCliente(String nombreCliente) {
-        this.nombreCliente = nombreCliente;
-    }
-
-    public String getApellidoCliente() {
-        return apellidoCliente;
-    }
-
-
-    public void setApellidoCliente(String apellidoCliente) {
-        this.apellidoCliente = apellidoCliente;
-    }
-
-    public int getDniCliente() {
-        return dniCliente;
-    }
-
-    public void setDniCliente(int dniCliente) {
-        this.dniCliente = dniCliente;
-    }
-
-    public List<ProductoDto> getProductos() {
-        return productos;
-    }
-
-    public void setProductos(List<ProductoDto> productos) {
-        this.productos = productos;
-    }
-
-    public BigDecimal getTotalCompra() {
-        return totalCompra;
-    }
-
-    public void setTotalCompra(BigDecimal totalCompra) {
-        this.totalCompra = totalCompra;
+    public void setVentaDto(VentaDto ventaDto) {
+        this.ventaDto = ventaDto;
     }
 }

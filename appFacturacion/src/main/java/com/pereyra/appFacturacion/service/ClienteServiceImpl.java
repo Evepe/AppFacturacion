@@ -1,15 +1,19 @@
 package com.pereyra.appFacturacion.service;
+import com.pereyra.appFacturacion.dtos.ClienteDto;
 import com.pereyra.appFacturacion.entity.Cliente;
 import com.pereyra.appFacturacion.repository.ClienteRespository;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -30,27 +34,34 @@ public class ClienteServiceImpl implements ClienteService{
     @Override
     public ResponseEntity<String> agregarCliente(Cliente cliente) {
         try {
-            //Guarda el cliente en la BD
+          if (StringUtils.isEmpty(cliente.getNombreCliente()) || StringUtils.isEmpty(cliente.getApellidoCliente()) || cliente.getDniCliente() == 0)  {
+              return ResponseEntity.status(HttpStatus.CONFLICT).body("Error al guardar cliente. Complete los campos obligatorios: Nombre, Apellido y DNI.");
+          }
             clienteRepository.save(cliente);
-            return ResponseEntity.ok("Cliente agregado correctamente.");
-            //Manejo de excepciones
+            return ResponseEntity.ok("Cliente agregado correctamente." + "\n" + cliente);
+
+           //Manejo de excepciones
         } catch (DataAccessException e) {
             log.error("Error al agregar cliente. {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("ERROR. Cliente no agregado.");
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("ERROR INESPERADO. No se pudo agregar el cliente.");
         }
     }
 
     @Override
-    public List<Cliente> mostrarClientes() {
+    public ResponseEntity<?> mostrarCliente() {
         try {
-            //Devuelve Lista de Clientes
-            return clienteRepository.findAll();
-            //Manejo de excepciones
-        } catch (NoSuchElementException e) {
-            log.error("Error al obtener clientes. {}", e.getMessage());
-            return Collections.emptyList();
+            List<Cliente> listaCliente = clienteRepository.findAll();
+            return listaCliente.isEmpty()
+                    ? ResponseEntity.status(HttpStatus.NOT_FOUND).body("No cuentan con clientes almacenados" + Collections.emptyList())
+                    : ResponseEntity.status(HttpStatus.OK).body(listaCliente);
+        } catch (DataAccessException e) {
+            log.error("Error al acceder al listado de clientes. {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("ERROR INESPERADO. No se puede acceder a la lista de clientes almacenados.");
         }
     }
+
+
+
 
     @Override
     public ResponseEntity<String> modificarClientePorId(Long idCliente, Cliente cliente) {
@@ -65,29 +76,35 @@ public class ClienteServiceImpl implements ClienteService{
                 clienteAModificar.setDniCliente(cliente.getDniCliente());
                 clienteAModificar.setEMail(cliente.getEMail());
                 clienteRepository.save(clienteAModificar);
-                return ResponseEntity.ok().body("Cliente id: " + idCliente + " actualizado correctamente.");
+                return ResponseEntity.status(HttpStatus.OK).body("Cliente ID " + idCliente + " correctamente modificado.");
             } else {
-                return ResponseEntity.ok("Cliente con Id: "+idCliente+ " no encontrado.");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cliente con Id: " + idCliente + " no encontrado.");
             }
-            //Manejo de excepciones
         } catch (DataAccessException e) {
             log.error("Error al obtener cliente. {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Error interno al actualizar el cliente.");
         }
     }
 
+    public ClienteDto obtenerClientePorId(Long idCliente) {
+        Cliente cliente = clienteRepository.findById(idCliente).orElseThrow(() -> new NoSuchElementException("Cliente con ID " + idCliente + " no encontrado."));
+
+        ClienteDto clienteDto = new ClienteDto();
+        BeanUtils.copyProperties(cliente, clienteDto);
+
+        return clienteDto;
+    }
     @Override
     public ResponseEntity <?> mostrarClientePorId(Long id) {
         try{
             //Busca al cliente en BD si lo encuentra lo muestra
             Optional <Cliente> clienteOptional= clienteRepository.findById(id);
-            if(clienteOptional.isPresent()){
-                Cliente cliente=clienteOptional.get();
-                return ResponseEntity.ok(cliente);
-            } else{
-                return ResponseEntity.ok("Cliente con Id: " + id + " no encontrado.");
-            }
+
+            return ResponseEntity.status(HttpStatus.OK).body(clienteOptional);
             //Manejo excepciones
+
+            } catch (EmptyResultDataAccessException e){
+                return ResponseEntity.status(HttpStatus.OK).body("Cliente con Id: " + id + " no encontrado.");
         } catch (DataAccessException e){
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Error inesperado. No se puede procesar la peticion.");
         }
@@ -96,16 +113,20 @@ public class ClienteServiceImpl implements ClienteService{
     @Override
     public ResponseEntity<String> eliminarClientePorId(Long id) {
         try {
-            //Busca determinado cliente por Id y lo elimina
-            clienteRepository.deleteById(id);
-            return ResponseEntity.ok("Cliente con ID: " + id + " eliminado.");
-            //Manejo de excepciones en caso de no encontrarlo
-        } catch (EmptyResultDataAccessException e) {
-            return ResponseEntity.ok("Cliente con Id: " + id +" no encontrado.");
+            Optional <Cliente> clienteOptional=clienteRepository.findById(id);
+
+            if(clienteOptional.isPresent()) {
+                //Busca determinado cliente por Id y lo elimina
+                clienteRepository.deleteById(id);
+                return ResponseEntity.status(HttpStatus.OK).body("Cliente con ID: " + id + " eliminado.");
+            }
+            else {
+                return ResponseEntity.ok("Cliente con ID: " + id + " no encontrado.");
+            }
             //Manejo de excepciones
         } catch (DataAccessException e) {
             log.error("Error al eliminar cliente. {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Error interno al eliminar el cliente.");
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Error inesperado. No se pudo procesar la operacion.");
         }
     }
 
@@ -127,4 +148,7 @@ public class ClienteServiceImpl implements ClienteService{
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Error inesperado.");
         }
     }
+
+
+
 }

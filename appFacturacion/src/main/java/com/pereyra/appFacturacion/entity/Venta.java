@@ -2,12 +2,12 @@ package com.pereyra.appFacturacion.entity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 
     /**
@@ -32,9 +32,19 @@ import java.util.List;
         @NotNull
         private String fechaHoracreacion;
 
-        @Column (name="precio_total")
+        @Column
+        private BigDecimal precioTotal;
+
+        @Column (name="total_venta")
         private BigDecimal totalVenta;
 
+        /**
+         * -- GETTER --
+         *  Verifica si la venta está completa.
+         *
+         * @return true si la venta está completa, false de lo contrario.
+         */
+        @Getter
         @Column(name = "completa")
         private boolean completa;
 
@@ -42,13 +52,13 @@ import java.util.List;
         @JoinColumn(name="Cliente")
         private Cliente cliente;
 
-        @ManyToMany(cascade = {CascadeType.PERSIST})
-        @JoinTable(
-                name= "Ventas_Productos",
-                joinColumns = @JoinColumn(name = "idProducto"),
-                inverseJoinColumns = @JoinColumn(name="idVenta")
-        )
-        private List<Producto> productoList;
+        @ManyToOne
+        @JoinColumn(name = "idProducto")
+        private Producto producto;
+
+        @OneToMany(cascade = CascadeType.ALL)
+        private List <ProductoVersion> Versiones;
+
 
         /**
          * MarcarCompleta registra las ventas exitosas.
@@ -56,18 +66,6 @@ import java.util.List;
         public void marcarCompleta() {
             this.completa = true;
         }
-
-        /**
-         * Verifica si la venta está completa.
-         *
-         * @return true si la venta está completa, false de lo contrario.
-         */
-        public boolean isCompleta() {
-            return completa;
-        }
-
-
-
 
 
     }
