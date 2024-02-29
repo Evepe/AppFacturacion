@@ -1,21 +1,15 @@
 package com.pereyra.appFacturacion.controllers;
 
-import com.pereyra.appFacturacion.Requests.PrecioRequest;
-import com.pereyra.appFacturacion.Requests.StockRequest;
 import com.pereyra.appFacturacion.entity.Producto;
-import com.pereyra.appFacturacion.entity.ProductoVersion;
 import com.pereyra.appFacturacion.service.ClienteServiceImpl;
 import com.pereyra.appFacturacion.service.ProductoService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.List;
 
 /**
  * Endpoint para Crud de producto
@@ -48,22 +42,7 @@ public class ProductoController {
         return productoService.modificarProductoPorId(idProducto, producto);
     }
 
-    @PutMapping("/modificar/stock/{idProducto}")
-    public ResponseEntity <String> modificarStockProducto(@PathVariable Long idProducto, @RequestBody StockRequest request){
-        return productoService.modificarStockProductoPorId(idProducto, request.getStock());
 
-    }
-
-    @PutMapping ("/modificar/precio/{idProducto}")
-    public ResponseEntity <String> modificarPrecioProducto(@PathVariable Long idProducto, @RequestBody PrecioRequest request){
-        return productoService.modificarPrecioProductoPorId(idProducto, request.getPrecio());
-    }
-
-    @GetMapping ("mostrar/versiones/{idProducto}")
-    public ResponseEntity <?> mostrarVersiones(@PathVariable Long idProducto){
-       ;
-        return ResponseEntity.ok().body( productoService.mostrarVersionesProducto(idProducto));
-    }
 
     @DeleteMapping("/eliminar/{idProducto}")
     public ResponseEntity <String> eliminarCliente( @PathVariable Long idProducto){

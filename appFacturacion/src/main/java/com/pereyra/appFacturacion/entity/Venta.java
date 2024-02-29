@@ -1,4 +1,5 @@
 package com.pereyra.appFacturacion.entity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,7 +8,9 @@ import lombok.NoArgsConstructor;
 
 
 import javax.validation.constraints.NotNull;
+import java.io.Serial;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
     /**
@@ -15,57 +18,56 @@ import java.util.List;
      */
 
     @Entity
-    @Data //Genera getters & setters de cada atributo
-    @NoArgsConstructor //Genera constructor vacio requerido por JPA
-    @AllArgsConstructor //Genera constructor con totalidad de atributos
-    @Table(name="ventas") //Genera tabla venta en BD
-
+    @Data
+    @Table(name = "ventas")
     public class Venta {
+        @Serial
+        private static final long serialVersionUID = 1L;
 
-        //Atributos
 
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
         private Long idVenta;
 
-        @Column(name="fecha_creacion")
+        @Column(name = "fecha_creacion")
         @NotNull
         private String fechaHoracreacion;
 
-        @Column
-        private BigDecimal precioTotal;
 
-        @Column (name="total_venta")
-        private BigDecimal totalVenta;
+        @ManyToOne
+        @JoinColumn(name = "id_cliente")
+        private Cliente cliente;
 
-        /**
-         * -- GETTER --
-         *  Verifica si la venta está completa.
-         *
-         * @return true si la venta está completa, false de lo contrario.
-         */
+
+        @OneToMany(mappedBy = "venta", cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.EAGER)
+        private List<VentaDetalle> ventaDetalles;
+
+
+        @Column(name = "total_venta")
+        private double totalVenta;
+
         @Getter
         @Column(name = "completa")
         private boolean completa;
 
-        @ManyToOne(cascade= {CascadeType.PERSIST, CascadeType.MERGE})
-        @JoinColumn(name="Cliente")
-        private Cliente cliente;
-
-        @ManyToOne
-        @JoinColumn(name = "idProducto")
-        private Producto producto;
-
-        @OneToMany(cascade = CascadeType.ALL)
-        private List <ProductoVersion> Versiones;
+        public Venta() {
+            this.ventaDetalles = new ArrayList<>();
+        }
 
 
-        /**
-         * MarcarCompleta registra las ventas exitosas.
-         */
+        public Venta(Long idVenta, String fechaHoracreacion, Cliente cliente, List<VentaDetalle> ventaDetalles, double totalVenta, boolean completa) {
+            this.idVenta = idVenta;
+            this.fechaHoracreacion = fechaHoracreacion;
+            this.cliente = cliente;
+            this.ventaDetalles = ventaDetalles;
+            this.totalVenta = totalVenta;
+            this.completa = completa;
+        }
+
         public void marcarCompleta() {
             this.completa = true;
         }
+
 
 
     }

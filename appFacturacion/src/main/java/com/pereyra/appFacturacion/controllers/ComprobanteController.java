@@ -22,7 +22,7 @@ import java.awt.*;
 @RestController
 @RequestMapping("facturacion/ventas/comprobante")
 public class ComprobanteController {
-/*
+
     @Autowired
     private ComprobanteService comprobanteService;
 
@@ -41,6 +41,6 @@ public class ComprobanteController {
         }
     }
 
- */
+
 
 }

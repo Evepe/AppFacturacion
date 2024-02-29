@@ -1,34 +1,26 @@
 package com.pereyra.appFacturacion.service;
-import com.pereyra.appFacturacion.dtos.ClienteDto;
+import com.pereyra.appFacturacion.dtos.VentaDetalleDto;
 import com.pereyra.appFacturacion.dtos.VentaDto;
-import com.pereyra.appFacturacion.dtos.VentaRequestDto;
-import com.pereyra.appFacturacion.dtos.VersionVentaRequestDto;
-import com.pereyra.appFacturacion.entity.Cliente;
-import com.pereyra.appFacturacion.entity.Producto;
-import com.pereyra.appFacturacion.entity.ProductoVersion;
-import com.pereyra.appFacturacion.entity.Venta;
-import com.pereyra.appFacturacion.repository.ClienteRespository;
-import com.pereyra.appFacturacion.repository.ProductoRepository;
-import com.pereyra.appFacturacion.repository.ProductoVersionRespository;
-import com.pereyra.appFacturacion.repository.VentaRepository;
+import com.pereyra.appFacturacion.entity.*;
+import com.pereyra.appFacturacion.repository.*;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Transactional
 @Service
 public class VentaServiceImpl implements VentaService{
+    final Logger log = LoggerFactory.getLogger(VentaServiceImpl.class);
 
     @Autowired
     private VentaRepository ventaRepository;
@@ -48,153 +40,105 @@ public class VentaServiceImpl implements VentaService{
     private FechaService fechaService;
 
     @Autowired
-    private ProductoVersionRespository productoVersionRespository;
-
-    @PersistenceContext
-    private EntityManager entityManager;
-
+    private VentaDetalleRepository ventaDetalleRepository;
 
 
     @Override
-   public Venta agregarVenta(Venta venta) {
-
-
-        // Verificar existencia de cliente y asignacion a la venta de existir
-        Optional<Cliente> clienteOptional = clienteRepository.findById(venta.getCliente().getIdCliente());
-        if (!clienteOptional.isPresent()) {
-            throw new NoSuchElementException("Cliente ID " + venta.getCliente().getIdCliente() + " no encontrado.");
-        }
-
-        Cliente cliente = clienteOptional.get();
-
-        venta.setFechaHoracreacion(fechaService.obtenerFecha());
-        venta.setCliente(cliente);
-        venta.setCompleta(false);
-
-        // Verificar existencia de producto y asignacion a la venta de existir
-        List<ProductoVersion> productoVersion = new ArrayList<>();
-
-        for (ProductoVersion pv : venta.getVersiones()) {
-
-            Producto productoDemandado = pv.getProducto();
-            if (productoDemandado == null) {
-                throw new IllegalArgumentException("El producto en ProductoVersion es nulo.");
+    public ResponseEntity<?> agregarVenta(Venta venta) {
+        try {
+            Long idCliente= venta.getCliente().getIdCliente();
+            Cliente cliente = clienteRepository.findById(idCliente)
+                    .orElseThrow(() -> new NoSuchElementException("Cliente no encontrado."));
+            System.out.println(cliente);
+            if (cliente == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cliente no encontrado.");
+            } else {
+                venta.setCliente(cliente);
+                venta.setFechaHoracreacion(fechaService.obtenerFecha());
+                venta.setCompleta(false);
             }
 
-            Long idUltimaVersion = obtenerUltimaVersionProducto(productoDemandado.getIdProducto());
-            ProductoVersion versionUltima = productoVersionRespository.findById(idUltimaVersion)
-                    .orElseThrow(() -> new NoSuchElementException("Versión no encontrada para el producto ID " + productoDemandado.getIdProducto()));
+            List<VentaDetalle> detalles = new ArrayList<>();
+            double totalVenta =0;
 
-            int stock = pv.getProducto().getStockProducto();
-            int unidadesPorVenta = pv.getProducto().getUnidadPorVenta();
 
-            if (stock < unidadesPorVenta) {
-                throw new NoSuchElementException("No hay stock disponible para el producto ID " + productoDemandado.getIdProducto());
+
+            for (VentaDetalle vd : venta.getVentaDetalles()) {
+                Long idProducto=vd.getIdProducto();
+
+                Producto producto= productoRepository.findById(idProducto).orElseThrow(()-> new NoSuchElementException("Producto inexistente."));
+                System.out.println(producto);
+                if (producto.getStockProducto() < vd.getCantidad()) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                            .body("Stock insuficiente para el producto " + producto.getIdProducto());
+                }
+
+                int cantidadTotalVendida =  + producto.getCantidadVendida() + vd.getCantidad();
+                producto.setCantidadTotalVendido(cantidadTotalVendida);
+                producto.setStockProducto(producto.getStockProducto() - vd.getCantidad());
+                productoRepository.save(producto);
+
+                double precioUnidad= producto.getPrecioProducto();
+                        vd.setPrecio(precioUnidad);
+
+
+                vd.setMarca(producto.getMarcaProducto());
+                vd.setModelo(producto.getModeloProducto());
+                vd.setCaracteristica(producto.getCaracProducto());
+
+                totalVenta += precioUnidad * vd.getCantidad();
+                vd.setVenta(venta);
+                detalles.add(vd);
             }
 
+            venta.setTotalVenta(totalVenta);
+            venta.marcarCompleta();
 
-            productoDemandado.setStockProducto(stock - unidadesPorVenta);
-            productoDemandado.setCantidadVendida(productoDemandado.getCantidadVendida() + unidadesPorVenta);
-            productoDemandado.setUnidadPorVenta(pv.getProducto().getUnidadPorVenta());
+             venta.getVentaDetalles().addAll(detalles);
 
+            ventaRepository.save(venta);
+            Long idVenta=venta.getIdVenta();
 
-            productoVersion.add(versionUltima);
+            System.out.println("Id venta: " + idVenta);
+            VentaDto respuesta = new VentaDto();
+            respuesta.setIdVentaDto(idVenta);
+            respuesta.setIdCliente(cliente.getIdCliente());
+            respuesta.setNombreCliente(cliente.getNombreCliente());
+            respuesta.setApellidoCliente(cliente.getApellidoCliente());
+            respuesta.setDetalleVenta(new ArrayList<>());
+
+            for (VentaDetalle vd : venta.getVentaDetalles()) {
+                VentaDetalleDto detalle = new VentaDetalleDto();
+                Long idProducto=vd.getIdProducto();
+                detalle.setIdProducto(idProducto);
+                detalle.setMarca(vd.getMarca());
+                detalle.setModelo(vd.getModelo());
+                detalle.setCaracteristica(vd.getCaracteristica());
+                detalle.setPrecio(vd.getPrecio());
+                respuesta.getDetalleVenta().add(detalle);
+            }
+
+            respuesta.setPrecioTotal(totalVenta);
+            respuesta.setFechaCreacionVentaDto(fechaService.obtenerFecha());
+
+            return ResponseEntity.ok(respuesta);
+
+        } catch (DataAccessException e) {
+            log.error(e.getMessage());
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Error al agregar venta.");
         }
-
-
-        // Calcular total de la venta
-        BigDecimal totalVenta = productoVersion.stream()
-                .map(version -> version.getPrecioProducto().multiply(new BigDecimal(version.getProducto().getUnidadPorVenta())))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        venta.setTotalVenta(totalVenta);
-        venta.getVersiones().addAll(productoVersion);
-
-        venta.marcarCompleta();
-
-        return ventaRepository.save(venta);
-
-   }
-
-
-//    public VentaDto crearVenta(VentaRequestDto ventaRequestDto) {
-//        // ... (validaciones y creación de cliente)
-//        // Validar que el cliente exista
-//        Long idCliente = ventaRequestDto.getCliente().getIdClienteDto();
-//        ClienteDto clienteDto = clienteService.obtenerClientePorId(idCliente);
-//        if (clienteDto == null) {
-//            throw new NoSuchElementException("Cliente con ID " + idCliente + " no encontrado.");
-//        }
-//
-//        // Crear la entidad Cliente a partir del DTO
-//        Cliente cliente = new Cliente();
-//        cliente.setIdCliente(clienteDto.getIdClienteDto());
-//        cliente.setNombreCliente(clienteDto.getNombreClienteDto());
-//        cliente.setApellidoCliente(clienteDto.getApellidoClienteDto());
-//        // Crear la entidad Venta y asignar el cliente
-//        Venta venta = new Venta();
-//        venta.setCliente(cliente);
-//        venta.setFechaHoracreacion(fechaService.obtenerFecha());
-//        venta.setTotalVenta(BigDecimal.ZERO); // Inicializar el precio total
-//
-//        // Procesar las versiones de productos
-//        List<ProductoVersion> productoVersionList = new ArrayList<>();
-//        for (VersionVentaRequestDto versionDto : ventaRequestDto.getVersiones()) {
-//            // Validar que la versión del producto exista
-//
-//            Long idProducto= versionDto.getProducto().getIdProductoDto();
-//            Long idVersion = obtenerUltimaVersionProducto(idProducto);
-//            ProductoVersion productoVersion = productoVersionRespository.findById(idVersion)
-//                    .orElseThrow(() -> new NoSuchElementException("Versión de producto con ID " + idVersion + " no encontrada."));
-//
-//            // Procesar la cantidad de productos y actualizar el stock
-//            int cantidad = versionDto.getCantidad();
-//            Producto producto = productoVersion.getProducto();
-//            if (producto.getStockProducto() < cantidad) {
-//                throw new NoSuchElementException("No hay suficiente stock disponible para el producto ID " + producto.getIdProducto());
-//            }
-//
-//            producto.setStockProducto(producto.getStockProducto() - cantidad);
-//            producto.setCantidadVendida(producto.getCantidadVendida() + cantidad);
-//
-//            // Verificar si el precio de la versión es null
-//            BigDecimal precioUnitario = productoVersion.getPrecioProducto();
-//            if (precioUnitario == null) {
-//                throw new NullPointerException("Precio de producto con ID " + producto.getIdProducto() + " es nulo.");
-//            }
-//
-//            // Actualizar el precio total de la venta
-//            BigDecimal subtotal = precioUnitario.multiply(BigDecimal.valueOf(cantidad));
-//            venta.setTotalVenta(venta.getPrecioTotal().add(subtotal));
-//
-//            // Agregar la ProductoVersion a la lista
-//            productoVersionList.add(productoVersion);
-//        }
-//
-//        // Asignar la lista de ProductoVersion a la Venta
-//        venta.setVersiones(productoVersionList);
-//
-//        // Guardar la Venta en la base de datos
-//        Venta ventaGuardada = ventaRepository.save(venta);
-//
-//        // Crear el DTO de respuesta
-//        VentaDto ventaDtoRespuesta = new VentaDto();
-//        ventaDtoRespuesta.setIdVentaDto(ventaGuardada.getIdVenta());
-//        ventaDtoRespuesta.setFechaCreacionVentaDto(ventaGuardada.getFechaHoracreacion());
-//        ventaDtoRespuesta.setPrecioTotal(ventaGuardada.getPrecioTotal());
-//        // ... (setear otros campos según sea necesario)
-//
-//        return ventaDtoRespuesta;
-//    }
-
-
-
-
-    @Override
-    public List<Venta> mostrarListadodeVentas() {
-        return ventaRepository.findAll();
-
     }
+
+    @Override
+    public List<Venta> findAllWithVentaDetalles(){
+
+         List<Venta> ventas = ventaRepository.findAllWithVentaDetalles();
+         if(ventas.isEmpty()){
+             throw new NoSuchElementException("Al momento no registra venta alguna.");
+         }
+        return ventas;
+    }
+
 
     @Override
     public ResponseEntity <?> mostrarVentaPorId(Long idVenta){
@@ -212,21 +156,68 @@ public class VentaServiceImpl implements VentaService{
         }
     }
 
+    @Override
+    public List<Venta> findVentasByIdCliente(Long idCliente) {
 
-    private Long obtenerUltimaVersionProducto(Long idProducto) {
-        Producto productoExiste = productoRepository.findById(idProducto)
-                .orElseThrow(() -> new NoSuchElementException("Producto ID: " + idProducto + " no encontrado."));
+        Cliente cliente = clienteRepository.findById(idCliente)
+                .orElseThrow(() -> new NoSuchElementException("Cliente no encontrado."));
 
-        List<ProductoVersion> versiones = productoExiste.getProductoVersionList();
 
-        if (versiones.isEmpty()) {
-            throw new NoSuchElementException("No hay versiones para el producto ID: " + idProducto);
+        List<Venta> ventas = ventaRepository.findVentasByIdCliente(idCliente);
+
+        if (ventas.isEmpty()) {
+
+            throw new NoSuchElementException("No se encontraron ventas para el cliente con ID: " + idCliente);
         }
 
-        ProductoVersion ultimaVersion = versiones.get(versiones.size() - 1);
-        return ultimaVersion.getIdVs();
+        return ventas;
     }
 
+    @Override
+    public List<Venta> findVentasByDniCliente(int dniCliente) {
+
+        Cliente cliente = clienteRepository.findByDniCliente(dniCliente)
+                .orElseThrow(() -> new NoSuchElementException("Cliente no encontrado con DNI: " + dniCliente));
+
+        List<Venta> ventas = ventaRepository.findVentasByIdCliente(cliente.getIdCliente());
+
+        if (ventas.isEmpty()) {
+
+            throw new NoSuchElementException("No se encontraron ventas para el cliente con DNI: " + dniCliente);
+        }
+
+        return ventas;
+    }
+
+
+    @Override
+    public List<Venta> findVentasByIdProducto(Long idProducto) {
+
+        Producto producto = productoRepository.findById(idProducto)
+                .orElseThrow(() -> new NoSuchElementException("Producto no encontrado con ID: " + idProducto));
+
+
+        List<Venta> ventas = ventaRepository.findVentasByIdProducto(idProducto);
+
+        if (ventas.isEmpty()) {
+
+            throw new NoSuchElementException("No se encontraron ventas para el producto con ID: " + idProducto);
+        }
+
+        return ventas;
+    }
+
+
+    @Override
+    public Venta findByIdVenta(Long idVenta) {
+
+        Venta venta = ventaRepository.findById(idVenta)
+                .orElseThrow(() -> new NoSuchElementException("Venta no encontrada con ID: " + idVenta));
+
+
+
+        return venta;
+    }
 
 }
 

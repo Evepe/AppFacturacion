@@ -3,30 +3,29 @@ package com.pereyra.appFacturacion.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.pereyra.appFacturacion.dtos.ContextoVersion;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.validation.beanvalidation.SpringValidatorAdapter;
 
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import java.io.Serial;
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Representa un producto en el sistema
  */
 @Entity
-@NoArgsConstructor
-@AllArgsConstructor
 @Data
 @Table (name= "productos") //Genera tabla producto en BD
 public class Producto {
+    @Serial
+    private static final long serialVersionUID = 1L;
 
 
     //Atributos
@@ -63,40 +62,29 @@ public class Producto {
     @Column(name = "precio")
     @JsonProperty("precio")
     @NotNull
-    private BigDecimal precioProducto;
+    private double precioProducto;
 
     @Column(name = "cantidad_vendida")
-    @JsonIgnore
     private int cantidadVendida;
 
-    @Column(name="unidad_Vendida")
-    private int unidadPorVenta;
+    @Column(name="Total_venta")
+    private int cantidadTotalVendido;
 
 
-    @OneToMany(mappedBy = "producto", cascade = CascadeType.ALL, orphanRemoval = true)
-    @OrderBy("version ASC")
-    @JsonIgnore
-    private List<ProductoVersion> productoVersionList;
+    public Producto() {
 
-    @JsonIgnore
-    private boolean seCreoVersion;
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Producto producto = (Producto) o;
-        return StockProducto == producto.StockProducto && cantidadVendida == producto.cantidadVendida && Objects.equals(idProducto, producto.idProducto) && Objects.equals(codigoProducto, producto.codigoProducto) && Objects.equals(marcaProducto, producto.marcaProducto) && Objects.equals(modeloProducto, producto.modeloProducto) && Objects.equals(caracProducto, producto.caracProducto) && Objects.equals(precioProducto, producto.precioProducto) && Objects.equals(productoVersionList, producto.productoVersionList);
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(idProducto, codigoProducto, marcaProducto, modeloProducto, caracProducto, StockProducto, precioProducto, cantidadVendida, productoVersionList);
+    public Producto(Long idProducto, String codigoProducto, String marcaProducto, String modeloProducto, String caracProducto, int stockProducto, double precioProducto, int cantidadVendida, int cantidadTotalVendido) {
+        this.idProducto = idProducto;
+        this.codigoProducto = codigoProducto;
+        this.marcaProducto = marcaProducto;
+        this.modeloProducto = modeloProducto;
+        this.caracProducto = caracProducto;
+        StockProducto = stockProducto;
+        this.precioProducto = precioProducto;
+        this.cantidadVendida = cantidadVendida;
+        this.cantidadTotalVendido = cantidadTotalVendido;
+
     }
-
-    public boolean isNuevaVersionCreada() {
-        return seCreoVersion;
-    }
-
-
 }

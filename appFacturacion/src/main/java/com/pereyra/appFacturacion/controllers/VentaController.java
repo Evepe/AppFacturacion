@@ -1,8 +1,6 @@
 package com.pereyra.appFacturacion.controllers;
 
-import com.pereyra.appFacturacion.dtos.ComprobanteDto;
 import com.pereyra.appFacturacion.dtos.VentaDto;
-import com.pereyra.appFacturacion.dtos.VentaRequestDto;
 import com.pereyra.appFacturacion.entity.Venta;
 import com.pereyra.appFacturacion.service.ComprobanteService;
 import com.pereyra.appFacturacion.service.VentaService;
@@ -32,10 +30,8 @@ public class VentaController {
 
     public ResponseEntity<?> agregarVenta(@RequestBody Venta venta) {
         try {
-           Venta ventaGuardada= ventaService.agregarVenta(venta);
-           // ComprobanteDto comprobanteDto=comprobanteService.generarComprobante(venta);
 
-            return ResponseEntity.ok(ventaGuardada);
+            return ResponseEntity.ok(ventaService.agregarVenta(venta));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Error al crear la venta: " + e.getMessage());
         }
@@ -46,21 +42,55 @@ public class VentaController {
 
     public ResponseEntity <?> mostrarLista(){
         try{
-            List<Venta> venta=ventaService.mostrarListadodeVentas();
+            List<Venta> venta=ventaService.findAllWithVentaDetalles();
             if(!venta.isEmpty()){
                 return ResponseEntity.ok(venta);
             } else{
                 return ResponseEntity.ok("Lista vacia.");
             }
         } catch(DataAccessException e){
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Error inesperado.");
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Error inesperado al acceder a historial de venta: " + e.getMessage());
         }
     }
 
 
     @GetMapping("/buscarventa/{idVenta}")
     public ResponseEntity <?> buscarVentaPorId(@PathVariable Long idVenta){
-        return ventaService.mostrarVentaPorId(idVenta);
+        try {
+            return ResponseEntity.status(HttpStatus.OK).body(ventaService.mostrarVentaPorId(idVenta));
+        }catch (DataAccessException e){
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Error inesperado. No se pudo procesar la solicitud " + e.getMessage());
+        }
     }
+
+    @GetMapping("/buscarventa/dni/{dniCliente}")
+    public ResponseEntity <?> buscarVentaPorDni(@PathVariable int dniCliente){
+        try {
+            return ResponseEntity.status(HttpStatus.OK).body(ventaService.findVentasByDniCliente(dniCliente));
+        } catch(DataAccessException e){
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Error inesperado. No se pudo procesar la solicitud " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/buscarventa/idCliente/{idCliente}")
+    public ResponseEntity <?> buscarVentaPorIdCliente(@PathVariable Long idCliente) {
+        try {
+            return ResponseEntity.status(HttpStatus.OK).body(ventaService.findVentasByIdCliente(idCliente));
+        } catch (DataAccessException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Error inesperado. No se pudo procesar la solicitud " + e.getMessage());
+        }
+    }
+
+
+    @GetMapping("/buscarVentas/idVenta")
+    public ResponseEntity <?> buscarVentaporIdVenta(@PathVariable Long idVenta){
+        try{
+            return ResponseEntity.status(HttpStatus.OK).body(ventaService.findByIdVenta(idVenta));
+        }catch (DataAccessException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Error inesperado. No se pudo procesar la solicitud " + e.getMessage());
+        }
+
+    }
+
 
 }

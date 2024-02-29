@@ -12,8 +12,8 @@ import org.springframework.stereotype.Service;
 public class ComprobanteService {
 
 
-//    private Comprobante comprobante;
-//    public ComprobanteDto generarComprobante(Venta venta){
-//        return comprobante.comprobanteVenta(venta);
-//    }
+    private Comprobante comprobante;
+    public ComprobanteDto generarComprobante(Venta venta){
+        return comprobante.comprobanteVenta(venta);
+    }
 }

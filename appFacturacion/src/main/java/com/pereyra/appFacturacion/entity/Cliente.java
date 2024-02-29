@@ -10,6 +10,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
+import java.io.Serial;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -17,13 +19,14 @@ import java.util.List;
  */
 @Entity
 @Data //Genera getters & setters
-@NoArgsConstructor //Genera constructor sin argumento requerido por JPA
-@AllArgsConstructor //Genera constructor con totalidad de argumento
 @Table(name="clientes", //Genera tabla y se asigna nombre Cliente
         uniqueConstraints = @UniqueConstraint(columnNames = "DNI")
 )
 @Builder
 public class Cliente {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     //Atributos
 
@@ -50,16 +53,20 @@ public class Cliente {
     @Email (message = "El formato de correo electronico es invalido.")
     private String eMail;
 
-
-    @OneToMany( mappedBy = "cliente",
-            cascade = CascadeType.ALL
-    )
     @JsonIgnore
+    @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Venta> ventas;
 
+    public Cliente() {
+        this.ventas=new ArrayList<>();
+    }
 
-
-
-
-
+    public Cliente(Long idCliente, String nombreCliente, String apellidoCliente, int dniCliente, String eMail, List<Venta> ventas) {
+        this.idCliente = idCliente;
+        this.nombreCliente = nombreCliente;
+        this.apellidoCliente = apellidoCliente;
+        this.dniCliente = dniCliente;
+        this.eMail = eMail;
+        this.ventas = ventas;
+    }
 }

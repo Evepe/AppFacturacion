@@ -1,8 +1,8 @@
 package com.pereyra.appFacturacion.service;
 
 import com.pereyra.appFacturacion.dtos.VentaDto;
-import com.pereyra.appFacturacion.dtos.VentaRequestDto;
 import com.pereyra.appFacturacion.entity.Venta;
+import org.springframework.data.repository.query.Param;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
@@ -12,12 +12,23 @@ import java.util.List;
  */
 public interface VentaService {
 
-    public Venta agregarVenta(Venta venta);
+    public ResponseEntity <?> agregarVenta(Venta venta);
 
-    public List<Venta> mostrarListadodeVentas();
+    List<Venta> findAllWithVentaDetalles();
 
 
-    public ResponseEntity<?> mostrarVentaPorId(Long idVenta);
+    ResponseEntity<?> mostrarVentaPorId(Long idVenta);
 
-//    public VentaDto crearVenta(VentaRequestDto ventaRequestDto);
+
+    List<Venta> findVentasByIdCliente(@Param("idCliente") Long idCliente);
+
+    List<Venta> findVentasByDniCliente(@Param("dniCliente") int dniCliente);
+
+    List<Venta> findVentasByIdProducto(@Param("idProducto") Long idProducto);
+
+    Venta findByIdVenta(Long idVenta);
+
+
+
+
 }

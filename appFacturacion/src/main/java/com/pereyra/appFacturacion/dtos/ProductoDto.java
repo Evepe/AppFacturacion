@@ -1,87 +1,61 @@
 package com.pereyra.appFacturacion.dtos;
 
-import java.math.BigDecimal;
 
+import com.pereyra.appFacturacion.entity.VentaDetalle;
+import lombok.Data;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+
+@Data
 public class ProductoDto {
 
-    private Long idProductoDto;
+    //Atributos
+
+    private Long idProducto;
+
+
+    private String codigoProducto;
+
+
     private String marcaProducto;
+
 
     private String modeloProducto;
 
-    private String caracteristicaProducto;
 
-    private BigDecimal precioUnitario;
+    private String caracProducto;
 
-    private int cantidadProductoDto;
 
-    private int stock;
+    private int StockProducto;
+
+
+    private double precioProducto;
+
+
+    private int cantidadVendida;
+
+
+    private int cantidadTotalVendido;
+
+
+    private List<VentaDetalle> ventaDetalles;
 
     public ProductoDto() {
+        this.ventaDetalles=new ArrayList<>();
     }
 
-    public ProductoDto(Long idProductoDto, String marcaProducto, String modeloProducto, String caracteristicaProducto, BigDecimal precioUnitario, int cantidadProductoDto) {
-        this.idProductoDto = idProductoDto;
+    public ProductoDto(Long idProducto, String codigoProducto, String marcaProducto, String modeloProducto, String caracProducto, int stockProducto, double precioProducto, int cantidadVendida, int cantidadTotalVendido, List<VentaDetalle> ventaDetalles) {
+        this.idProducto = idProducto;
+        this.codigoProducto = codigoProducto;
         this.marcaProducto = marcaProducto;
         this.modeloProducto = modeloProducto;
-        this.caracteristicaProducto = caracteristicaProducto;
-        this.precioUnitario = precioUnitario;
-        this.cantidadProductoDto = cantidadProductoDto;
-    }
-
-    public Long getIdProductoDto() {
-        return idProductoDto;
-    }
-
-    public void setIdProductoDto(Long idProductoDto) {
-        this.idProductoDto = idProductoDto;
-    }
-
-    public String getMarcaProducto() {
-        return marcaProducto;
-    }
-
-    public void setMarcaProducto(String marcaProducto) {
-        this.marcaProducto = marcaProducto;
-    }
-
-    public String getModeloProducto() {
-        return modeloProducto;
-    }
-
-    public void setModeloProducto(String modeloProducto) {
-        this.modeloProducto = modeloProducto;
-    }
-
-    public String getCaracteristicaProducto() {
-        return caracteristicaProducto;
-    }
-
-    public void setCaracteristicaProducto(String caracteristicaProducto) {
-        this.caracteristicaProducto = caracteristicaProducto;
-    }
-
-    public BigDecimal getPrecioUnitario() {
-        return precioUnitario;
-    }
-
-    public void setPrecioUnitario(BigDecimal precioUnitario) {
-        this.precioUnitario = precioUnitario;
-    }
-
-    public int getCantidadProductoDto() {
-        return cantidadProductoDto;
-    }
-
-    public void setCantidadProductoDto(int cantidadProductoDto) {
-        this.cantidadProductoDto = cantidadProductoDto;
-    }
-
-    public int getStock() {
-        return stock;
-    }
-
-    public void setStock(int stock) {
-        this.stock = stock;
+        this.caracProducto = caracProducto;
+        StockProducto = stockProducto;
+        this.precioProducto = precioProducto;
+        this.cantidadVendida = cantidadVendida;
+        this.cantidadTotalVendido = cantidadTotalVendido;
+        this.ventaDetalles = ventaDetalles;
     }
 }

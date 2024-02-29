@@ -11,16 +11,16 @@ public class ComprobanteDto {
 
     private ClienteDto cliente;
 
-    private List <ProductoDto> productoDto;
+    private List <VentaDetalleDto> ventaDetalleDto;
 
     private VentaDto ventaDto;
 
     public ComprobanteDto() {
     }
 
-    public ComprobanteDto(ClienteDto cliente, List<ProductoDto> productoDto, VentaDto ventaDto) {
+    public ComprobanteDto(ClienteDto cliente, List<VentaDetalleDto> ventaDetalleDto, VentaDto ventaDto) {
         this.cliente = cliente;
-        this.productoDto = productoDto;
+        this.ventaDetalleDto = ventaDetalleDto;
         this.ventaDto = ventaDto;
     }
 
@@ -32,12 +32,12 @@ public class ComprobanteDto {
         this.cliente = cliente;
     }
 
-    public List<ProductoDto> getProductoDto() {
-        return productoDto;
+    public List<VentaDetalleDto> getVentaDetalleDto() {
+        return ventaDetalleDto;
     }
 
-    public void setProductoDto(List<ProductoDto> productoDto) {
-        this.productoDto = productoDto;
+    public void setVentaDetalleDto(List<VentaDetalleDto> ventaDetalleDto) {
+        this.ventaDetalleDto = ventaDetalleDto;
     }
 
     public VentaDto getVentaDto() {

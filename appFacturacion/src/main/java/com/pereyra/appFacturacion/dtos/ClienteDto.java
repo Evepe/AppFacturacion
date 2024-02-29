@@ -22,7 +22,7 @@ public class ClienteDto {
     private int dniClienteDto;
 
 
-    private String eMail;
+
 
     public ClienteDto() {
     }
@@ -34,13 +34,7 @@ public class ClienteDto {
         this.dniClienteDto = dniClienteDto;
     }
 
-    public ClienteDto(Long idClienteDto, String nombreClienteDto, String apellidoClienteDto, int dniClienteDto, String eMail) {
-        this.idClienteDto = idClienteDto;
-        this.nombreClienteDto = nombreClienteDto;
-        this.apellidoClienteDto = apellidoClienteDto;
-        this.dniClienteDto = dniClienteDto;
-        this.eMail = eMail;
-    }
+
 
     public Long getIdClienteDto() {
         return idClienteDto;
@@ -74,11 +68,6 @@ public class ClienteDto {
         this.dniClienteDto = dniClienteDto;
     }
 
-    public String getEMail() {
-        return eMail;
-    }
 
-    public void setEMail(String eMail) {
-        this.eMail = eMail;
-    }
+
 }

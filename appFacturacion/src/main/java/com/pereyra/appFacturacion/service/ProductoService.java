@@ -1,12 +1,7 @@
 package com.pereyra.appFacturacion.service;
 
-import com.pereyra.appFacturacion.dtos.ClienteDto;
 import com.pereyra.appFacturacion.entity.Producto;
-import com.pereyra.appFacturacion.entity.ProductoVersion;
 import org.springframework.http.ResponseEntity;
-
-import java.math.BigDecimal;
-import java.util.List;
 
 /**
  * Interfaz que define los servicios relacionados con la entidad Producto
@@ -51,11 +46,8 @@ public interface ProductoService {
 
 
 
-    public ResponseEntity<String> modificarPrecioProductoPorId(Long idProducto, BigDecimal precioProducto);
 
-    public ResponseEntity<String> modificarStockProductoPorId(Long idProducto, int stock);
 
-    public List <ProductoVersion> mostrarVersionesProducto(Long idProducto);
 
 
 }
