@@ -56,7 +56,7 @@ public class VentaServiceImpl implements VentaService{
             //Se valida existencia de cliente
             Cliente cliente = clienteRepository.findById(idCliente)
                     .orElseThrow(() -> new NoSuchElementException("Cliente no encontrado."));
-            System.out.println(cliente);
+
             //Se verifica que el cliente no sea nulo
             if (cliente == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cliente no encontrado.");
@@ -83,10 +83,9 @@ public class VentaServiceImpl implements VentaService{
 
                 historicoCentidadVendida=producto.getCantidadTotalVendido();
 
-                int cantidadTotalVendida = producto.getCantidadVendida() + vd.getCantidad();
+                int cantidadTotalVendida = producto.getCantidadTotalVendido() + vd.getCantidad();
                 producto.setCantidadTotalVendido(cantidadTotalVendida);
                 producto.setStockProducto(producto.getStockProducto() - vd.getCantidad());
-                producto.setCantidadVendida(vd.getCantidad());
                 productoRepository.save(producto);
 
                 double precioUnidad = producto.getPrecioProducto();
@@ -220,16 +219,16 @@ public class VentaServiceImpl implements VentaService{
 
                 List<Venta> ventas = ventaRepository.findVentasByIdCliente(cliente.getIdCliente());
 
-                // Check if there are any sales found
+
                 if (ventas.isEmpty()) {
-                    return ResponseEntity.status(HttpStatus.OK).body(Collections.emptyList()); // Return empty list instead of throwing an exception
+                    return ResponseEntity.status(HttpStatus.OK).body(Collections.emptyList());
                 }
 
-                return ResponseEntity.ok(ventas); // Return successful response with the list of ventas
+                return ResponseEntity.ok(ventas);
 
             } catch (DataAccessException e) {
-                log.error("Error al buscar ventas por DNI de cliente. {}", e.getMessage()); // Include meaningful logging
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno del servidor."); // More specific error message
+                log.error("Error al buscar ventas por DNI de cliente. {}", e.getMessage());
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno del servidor.");
             }
         }
 
@@ -243,25 +242,25 @@ public class VentaServiceImpl implements VentaService{
     @Override
     public ResponseEntity<?> findVentasByIdProducto(Long idProducto) {
         try {
-            // Attempt to find the product by ID
+
             Optional<Producto> productoOptional = productoRepository.findById(idProducto);
 
-            // Check if the product exists
+
             if (!productoOptional.isPresent()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Producto no encontrado con ID: " + idProducto);
             }
 
-            Producto producto = productoOptional.get(); // Safe to unwrap since isEmpty() already checked
+            Producto producto = productoOptional.get();
 
-            // Find sales associated with the product
+
             List<Venta> ventas = ventaRepository.findVentasByIdProducto(producto.getIdProducto());
 
-            // Check if there are any sales found
+
             if (ventas.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.OK).body(Collections.emptyList()); // Return empty list if no sales found
+                return ResponseEntity.status(HttpStatus.OK).body(Collections.emptyList());
             }
 
-            return ResponseEntity.ok(ventas); // Return sales list
+            return ResponseEntity.ok(ventas);
 
         } catch (DataAccessException e) {
             log.error("Error al obtener las ventas del producto con ID: {}", idProducto, e);

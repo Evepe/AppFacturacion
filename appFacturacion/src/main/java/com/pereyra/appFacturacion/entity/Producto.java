@@ -15,6 +15,7 @@ import org.springframework.validation.beanvalidation.SpringValidatorAdapter;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.io.Serial;
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,9 +26,7 @@ import java.util.List;
 @Entity
 @Data
 @Table (name= "productos") //Genera tabla producto en BD
-public class Producto {
-    @Serial
-    private static final long serialVersionUID = 1L;
+public class Producto  {
 
 
     //Atributos
@@ -73,10 +72,8 @@ public class Producto {
     @Schema(description = "Precio del producto", example = "340000,00")
     private double precioProducto;
 
-    @Column(name = "cantidad_vendida")
-    @Min(1)
-    @Schema(description = "Cantidad de producto solicitado por el cliente en una compra", example = "5")
-    private int cantidadVendida;
+
+
 
     @Column(name="Total_venta")
     @Schema(description = "Conteo de total de venta de un producto", hidden = true, example = "50")
@@ -87,7 +84,7 @@ public class Producto {
 
     }
 
-    public Producto(Long idProducto, String codigoProducto, String marcaProducto, String modeloProducto, String caracProducto, int stockProducto, double precioProducto, int cantidadVendida, int cantidadTotalVendido) {
+    public Producto(Long idProducto, String codigoProducto, String marcaProducto, String modeloProducto, String caracProducto, int stockProducto, double precioProducto,int cantidadTotalVendido) {
         this.idProducto = idProducto;
         this.codigoProducto = codigoProducto;
         this.marcaProducto = marcaProducto;
@@ -95,7 +92,7 @@ public class Producto {
         this.caracProducto = caracProducto;
         this.stockProducto = stockProducto;
         this.precioProducto = precioProducto;
-        this.cantidadVendida = cantidadVendida;
+
         this.cantidadTotalVendido = cantidadTotalVendido;
 
     }

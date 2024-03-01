@@ -15,6 +15,7 @@ import lombok.Setter;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.io.Serial;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -29,10 +30,9 @@ import java.util.Objects;
         uniqueConstraints = @UniqueConstraint(columnNames = "DNI")
 )
 @Builder
-public class Cliente {
+public class Cliente  {
 
-    @Serial
-    private static final long serialVersionUID = 1L;
+
 
     //Atributos
 
