@@ -1,5 +1,6 @@
 package com.pereyra.appFacturacion.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -27,27 +28,33 @@ import java.util.List;
 
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
+        @Schema(description = "ID de venta", example = "1")
         private Long idVenta;
 
         @Column(name = "fecha_creacion")
         @NotNull
+        @Schema(description = "Fecha en que se efectua la venta", example = "2024-03-01")
         private String fechaHoracreacion;
 
 
         @ManyToOne
         @JoinColumn(name = "id_cliente")
+        @Schema(description = "Cliente que realiza la compra", example = "Maria")
         private Cliente cliente;
 
 
         @OneToMany(mappedBy = "venta", cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.EAGER)
+        @Schema(hidden = true)
         private List<VentaDetalle> ventaDetalles;
 
 
         @Column(name = "total_venta")
+        @Schema(name="Precio final de cada venta", example = "340.50")
         private double totalVenta;
 
         @Getter
         @Column(name = "completa")
+        @Schema(hidden = true)
         private boolean completa;
 
         public Venta() {

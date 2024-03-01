@@ -1,50 +1,46 @@
 package com.pereyra.appFacturacion.dtos;
 
-import com.pereyra.appFacturacion.entity.Producto;
-import com.pereyra.appFacturacion.entity.Venta;
 
-import java.math.BigDecimal;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.List;
 
+/**
+ * Clase que representa el objeto de transferencia de datos (DTO) para el comprobante de venta.
+ * Contiene información sobre el cliente, los detalles de la venta y la información general de la venta.
+ */
 
+@Getter
+@Setter
 public class ComprobanteDto {
 
-    private ClienteDto cliente;
 
-    private List <VentaDetalleDto> ventaDetalleDto;
 
+    /** Lista de detalles de venta asociados al comprobante. */
+    private List<VentaDetalleDto> ventaDetalleDto;
+
+    /** Información general de la venta asociada al comprobante. */
     private VentaDto ventaDto;
 
+    /**
+     * Constructor vacío de la clase.
+     */
     public ComprobanteDto() {
     }
 
-    public ComprobanteDto(ClienteDto cliente, List<VentaDetalleDto> ventaDetalleDto, VentaDto ventaDto) {
-        this.cliente = cliente;
+    /**
+     * Constructor con parámetros para inicializar un objeto ComprobanteDto.
+     *
+
+     * @param ventaDetalleDto Lista de detalles de venta asociados al comprobante.
+     * @param ventaDto      Información general de la venta asociada al comprobante.
+     */
+    public ComprobanteDto(List<VentaDetalleDto> ventaDetalleDto, VentaDto ventaDto) {
+
         this.ventaDetalleDto = ventaDetalleDto;
         this.ventaDto = ventaDto;
     }
 
-    public ClienteDto getCliente() {
-        return cliente;
-    }
 
-    public void setCliente(ClienteDto cliente) {
-        this.cliente = cliente;
-    }
-
-    public List<VentaDetalleDto> getVentaDetalleDto() {
-        return ventaDetalleDto;
-    }
-
-    public void setVentaDetalleDto(List<VentaDetalleDto> ventaDetalleDto) {
-        this.ventaDetalleDto = ventaDetalleDto;
-    }
-
-    public VentaDto getVentaDto() {
-        return ventaDto;
-    }
-
-    public void setVentaDto(VentaDto ventaDto) {
-        this.ventaDto = ventaDto;
-    }
 }

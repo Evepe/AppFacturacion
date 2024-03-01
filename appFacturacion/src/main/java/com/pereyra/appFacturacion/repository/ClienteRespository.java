@@ -8,5 +8,12 @@ import java.util.Optional;
 
 @Repository
 public interface ClienteRespository extends JpaRepository<Cliente, Long> {
+
+    /**
+     * Encuentra un cliente por su DNI.
+     *
+     * @param dniCliente El DNI del cliente a buscar.
+     * @return Un cliente opcional si se encuentra, de lo contrario, vacío.
+     */
     Optional<Cliente> findByDniCliente(int dniCliente);
 }

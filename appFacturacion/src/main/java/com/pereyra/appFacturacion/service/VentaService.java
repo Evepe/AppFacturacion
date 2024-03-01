@@ -12,21 +12,61 @@ import java.util.List;
  */
 public interface VentaService {
 
-    public ResponseEntity <?> agregarVenta(Venta venta);
+    /**
+     * Agrega una nueva venta al sistema.
+     *
+     * @param venta La venta a agregar.
+     * @return ResponseEntity que indica el resultado de la operación.
+     */
+    public ResponseEntity <?> agregarVenta(@Param("venta") Venta venta);
 
+    /**
+     * Obtiene una lista de todas las ventas con detalles almacenadas en el sistema.
+     *
+     * @return Lista de ventas con detalles.
+     */
     List<Venta> findAllWithVentaDetalles();
 
+    /**
+     * Obtiene una lista de todas las ventas con detalles almacenadas en el sistema.
+     *
+     * @return Lista de ventas con detalles.
+     */
 
-    ResponseEntity<?> mostrarVentaPorId(Long idVenta);
+    ResponseEntity<?> mostrarVentaPorId(@Param ("idVenta") Long idVenta);
 
+    /**
+     * Obtiene una lista de ventas asociadas a un cliente por su ID.
+     *
+     * @param idCliente ID del cliente.
+     * @return Lista de ventas asociadas al cliente.
+     */
 
-    List<Venta> findVentasByIdCliente(@Param("idCliente") Long idCliente);
+   ResponseEntity<?> findVentasByIdCliente(@Param("idCliente") Long idCliente);
 
-    List<Venta> findVentasByDniCliente(@Param("dniCliente") int dniCliente);
+    /**
+     * Obtiene una lista de ventas asociadas a un cliente por su DNI.
+     *
+     * @param dniCliente DNI del cliente.
+     * @return Lista de ventas asociadas al cliente.
+     */
+    ResponseEntity <?>findVentasByDniCliente(@Param("dniCliente") int dniCliente);
 
-    List<Venta> findVentasByIdProducto(@Param("idProducto") Long idProducto);
+    /**
+     * Obtiene una lista de ventas asociadas a un producto por su ID.
+     *
+     * @param idProducto ID del producto.
+     * @return Lista de ventas asociadas al producto.
+     */
+    ResponseEntity <?> findVentasByIdProducto(@Param("idProducto") Long idProducto);
 
-    Venta findByIdVenta(Long idVenta);
+    /**
+     * Obtiene una venta por su ID.
+     *
+     * @param idVenta ID de la venta.
+     * @return La venta encontrada.
+     */
+    Venta findByIdVenta(@Param("idVenta") Long idVenta);
 
 
 

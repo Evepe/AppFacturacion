@@ -14,6 +14,6 @@ public class ComprobanteService {
 
     private Comprobante comprobante;
     public ComprobanteDto generarComprobante(Venta venta){
-        return comprobante.comprobanteVenta(venta);
+        return Comprobante.comprobanteVenta(venta);
     }
 }

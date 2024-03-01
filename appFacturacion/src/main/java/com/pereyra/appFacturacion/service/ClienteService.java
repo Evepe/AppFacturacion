@@ -43,7 +43,7 @@ public interface ClienteService {
     /**
      * Elimina un Cliente por Id
      * @param id identificador unico para eliminar cliente
-     * @return
+     * @return ResponseEntity devuelve resultado de la operacion
      */
     public ResponseEntity <?> eliminarClientePorId(Long id);
 

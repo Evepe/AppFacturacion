@@ -1,10 +1,6 @@
 package com.pereyra.appFacturacion.service;
-import com.pereyra.appFacturacion.dtos.VentaDetalleDto;
-import com.pereyra.appFacturacion.dtos.VentaDto;
 import com.pereyra.appFacturacion.entity.*;
 import com.pereyra.appFacturacion.repository.*;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,9 +9,12 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import java.math.BigDecimal;
 import java.util.*;
-import java.util.stream.Collectors;
+
+/**
+ * Servicios relacionados con la entidad Venta.
+ * Contiene operaciones CRUD para gestionar ventas y detalles de ventas.
+ */
 
 @Transactional
 @Service
@@ -42,44 +41,56 @@ public class VentaServiceImpl implements VentaService{
     @Autowired
     private VentaDetalleRepository ventaDetalleRepository;
 
-
+    /**
+     * Agrega una nueva venta al sistema, realiza la validación de existencia de cliente y productos.
+     *
+     * @param venta La venta a agregar.
+     * @return ResponseEntity que indica el resultado de la operación.
+     */
     @Override
     public ResponseEntity<?> agregarVenta(Venta venta) {
         try {
-            Long idCliente= venta.getCliente().getIdCliente();
+            //Se almacena el id del cliente
+            Long idCliente = venta.getCliente().getIdCliente();
+
+            //Se valida existencia de cliente
             Cliente cliente = clienteRepository.findById(idCliente)
                     .orElseThrow(() -> new NoSuchElementException("Cliente no encontrado."));
             System.out.println(cliente);
+            //Se verifica que el cliente no sea nulo
             if (cliente == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cliente no encontrado.");
             } else {
+
                 venta.setCliente(cliente);
                 venta.setFechaHoracreacion(fechaService.obtenerFecha());
                 venta.setCompleta(false);
             }
 
             List<VentaDetalle> detalles = new ArrayList<>();
-            double totalVenta =0;
+            double totalVenta = 0;
 
-
-
+            int historicoCentidadVendida;
             for (VentaDetalle vd : venta.getVentaDetalles()) {
-                Long idProducto=vd.getIdProducto();
-
-                Producto producto= productoRepository.findById(idProducto).orElseThrow(()-> new NoSuchElementException("Producto inexistente."));
-                System.out.println(producto);
+                Long idProducto = vd.getIdProducto();
+                //Se verifica existencia del producto
+                Producto producto = productoRepository.findById(idProducto).orElseThrow(() -> new NoSuchElementException("Producto inexistente."));
+                //Se comprueba stock del producto solicitado
                 if (producto.getStockProducto() < vd.getCantidad()) {
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                             .body("Stock insuficiente para el producto " + producto.getIdProducto());
                 }
 
-                int cantidadTotalVendida =  + producto.getCantidadVendida() + vd.getCantidad();
+                historicoCentidadVendida=producto.getCantidadTotalVendido();
+
+                int cantidadTotalVendida = producto.getCantidadVendida() + vd.getCantidad();
                 producto.setCantidadTotalVendido(cantidadTotalVendida);
                 producto.setStockProducto(producto.getStockProducto() - vd.getCantidad());
+                producto.setCantidadVendida(vd.getCantidad());
                 productoRepository.save(producto);
 
-                double precioUnidad= producto.getPrecioProducto();
-                        vd.setPrecio(precioUnidad);
+                double precioUnidad = producto.getPrecioProducto();
+                vd.setPrecio(precioUnidad);
 
 
                 vd.setMarca(producto.getMarcaProducto());
@@ -94,129 +105,187 @@ public class VentaServiceImpl implements VentaService{
             venta.setTotalVenta(totalVenta);
             venta.marcarCompleta();
 
-             venta.getVentaDetalles().addAll(detalles);
 
             ventaRepository.save(venta);
-            Long idVenta=venta.getIdVenta();
+            Long idVenta = venta.getIdVenta();
 
-            System.out.println("Id venta: " + idVenta);
-            VentaDto respuesta = new VentaDto();
-            respuesta.setIdVentaDto(idVenta);
-            respuesta.setIdCliente(cliente.getIdCliente());
-            respuesta.setNombreCliente(cliente.getNombreCliente());
-            respuesta.setApellidoCliente(cliente.getApellidoCliente());
-            respuesta.setDetalleVenta(new ArrayList<>());
 
-            for (VentaDetalle vd : venta.getVentaDetalles()) {
-                VentaDetalleDto detalle = new VentaDetalleDto();
-                Long idProducto=vd.getIdProducto();
-                detalle.setIdProducto(idProducto);
-                detalle.setMarca(vd.getMarca());
-                detalle.setModelo(vd.getModelo());
-                detalle.setCaracteristica(vd.getCaracteristica());
-                detalle.setPrecio(vd.getPrecio());
-                respuesta.getDetalleVenta().add(detalle);
-            }
-
-            respuesta.setPrecioTotal(totalVenta);
-            respuesta.setFechaCreacionVentaDto(fechaService.obtenerFecha());
-
-            return ResponseEntity.ok(respuesta);
-
+            return ResponseEntity.ok(venta);
+    //Manejo de excepciones
         } catch (DataAccessException e) {
             log.error(e.getMessage());
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Error al agregar venta.");
         }
     }
 
-    @Override
-    public List<Venta> findAllWithVentaDetalles(){
+    /**
+     * Obtiene una lista de todas las ventas con detalles almacenadas en el sistema.
+     *
+     * @return Lista de ventas con detalles.
+     * @throws NoSuchElementException Si no se encuentran ventas.
+     */
 
-         List<Venta> ventas = ventaRepository.findAllWithVentaDetalles();
-         if(ventas.isEmpty()){
-             throw new NoSuchElementException("Al momento no registra venta alguna.");
-         }
+    @Override
+    public List<Venta> findAllWithVentaDetalles() {
+        List<Venta> ventas = ventaRepository.findAllWithVentaDetalles();
+        if (ventas.isEmpty()) {
+            throw new NoSuchElementException("Al momento no registra venta alguna.");
+        }
         return ventas;
     }
 
+    /**
+     * Obtiene una venta por su ID.
+     *
+     * @param idVenta ID de la venta a obtener.
+     * @return ResponseEntity que contiene la venta o un mensaje indicando que la venta no fue encontrada.
+     */
 
     @Override
-    public ResponseEntity <?> mostrarVentaPorId(Long idVenta){
-        try{
-            Optional <Venta> ventaOptional= ventaRepository.findById(idVenta);
-            if (ventaOptional.isPresent()){
-                Venta venta=ventaOptional.get();
-                return ResponseEntity.ok(venta);
+    public ResponseEntity<?> mostrarVentaPorId(Long idVenta) {
+        try {
+            Optional<Venta> ventaOptional = ventaRepository.findById(idVenta);
+            if (ventaOptional.isPresent()) {
+                Venta venta = ventaOptional.get();
+                return ResponseEntity.status(HttpStatus.OK).body(venta);
 
-            } else{
-                return ResponseEntity.ok("Venta con Id: " + idVenta + " no encontrado.");
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Venta con Id: " + idVenta + " no encontrado.");
             }
-        } catch(DataAccessException e){
+        } catch (DataAccessException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Error inesperado.");
         }
     }
 
-    @Override
-    public List<Venta> findVentasByIdCliente(Long idCliente) {
 
-        Cliente cliente = clienteRepository.findById(idCliente)
-                .orElseThrow(() -> new NoSuchElementException("Cliente no encontrado."));
-
-
-        List<Venta> ventas = ventaRepository.findVentasByIdCliente(idCliente);
-
-        if (ventas.isEmpty()) {
-
-            throw new NoSuchElementException("No se encontraron ventas para el cliente con ID: " + idCliente);
-        }
-
-        return ventas;
-    }
+    /**
+     * Obtiene una lista de ventas asociadas a un cliente por su ID.
+     *
+     * @param idCliente ID del cliente.
+     *@return ResponseEntity que contiene la venta o un mensaje indicando que la venta no fue encontrada.
+     */
 
     @Override
-    public List<Venta> findVentasByDniCliente(int dniCliente) {
+    public ResponseEntity <?> findVentasByIdCliente(Long idCliente) {
+        try {
 
-        Cliente cliente = clienteRepository.findByDniCliente(dniCliente)
-                .orElseThrow(() -> new NoSuchElementException("Cliente no encontrado con DNI: " + dniCliente));
+            Optional<Cliente> clienteOptional = clienteRepository.findById(idCliente);
 
-        List<Venta> ventas = ventaRepository.findVentasByIdCliente(cliente.getIdCliente());
+            if (!clienteOptional.isPresent()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cliente no encontrado con ID: " + idCliente);
+            }
 
-        if (ventas.isEmpty()) {
+            Cliente cliente = clienteOptional.get();
 
-            throw new NoSuchElementException("No se encontraron ventas para el cliente con DNI: " + dniCliente);
+
+            List<Venta> ventas = ventaRepository.findVentasByIdCliente(cliente.getIdCliente());
+
+
+            if (ventas.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.OK).body("Cliente ID " + idCliente + " no registra compra alguna.");
+
+            }
+
+            return ResponseEntity.ok(ventas);
+        } catch (DataAccessException e) {
+            log.error("Error al buscar ventas por ID de cliente: {}", idCliente, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno del servidor. Contacte al administrador.");
         }
 
-        return ventas;
     }
 
+
+
+
+    /**
+     * Obtiene una lista de ventas asociadas a un cliente por su DNI.
+     *
+     * @param dniCliente DNI del cliente.
+     *@return ResponseEntity que contiene ventas asociadas o un mensaje indicando que la venta no fue encontrada.
+     */
+
+        @Override
+        public ResponseEntity<?> findVentasByDniCliente (int dniCliente){
+            try {
+
+                Optional<Cliente> clienteOptional = clienteRepository.findByDniCliente(dniCliente);
+
+
+                if (clienteOptional.isEmpty()) {
+                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cliente no encontrado");
+                }
+
+                Cliente cliente = clienteOptional.get();
+
+
+                List<Venta> ventas = ventaRepository.findVentasByIdCliente(cliente.getIdCliente());
+
+                // Check if there are any sales found
+                if (ventas.isEmpty()) {
+                    return ResponseEntity.status(HttpStatus.OK).body(Collections.emptyList()); // Return empty list instead of throwing an exception
+                }
+
+                return ResponseEntity.ok(ventas); // Return successful response with the list of ventas
+
+            } catch (DataAccessException e) {
+                log.error("Error al buscar ventas por DNI de cliente. {}", e.getMessage()); // Include meaningful logging
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno del servidor."); // More specific error message
+            }
+        }
+
+    /**
+     * Obtiene una lista de ventas asociadas a un producto por su ID.
+     *
+     * @param idProducto ID del producto.
+     * @return ResponseEntity que contiene la venta o un mensaje indicando que la venta no fue encontrada.
+     */
 
     @Override
-    public List<Venta> findVentasByIdProducto(Long idProducto) {
+    public ResponseEntity<?> findVentasByIdProducto(Long idProducto) {
+        try {
+            // Attempt to find the product by ID
+            Optional<Producto> productoOptional = productoRepository.findById(idProducto);
 
-        Producto producto = productoRepository.findById(idProducto)
-                .orElseThrow(() -> new NoSuchElementException("Producto no encontrado con ID: " + idProducto));
+            // Check if the product exists
+            if (!productoOptional.isPresent()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Producto no encontrado con ID: " + idProducto);
+            }
 
+            Producto producto = productoOptional.get(); // Safe to unwrap since isEmpty() already checked
 
-        List<Venta> ventas = ventaRepository.findVentasByIdProducto(idProducto);
+            // Find sales associated with the product
+            List<Venta> ventas = ventaRepository.findVentasByIdProducto(producto.getIdProducto());
 
-        if (ventas.isEmpty()) {
+            // Check if there are any sales found
+            if (ventas.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.OK).body(Collections.emptyList()); // Return empty list if no sales found
+            }
 
-            throw new NoSuchElementException("No se encontraron ventas para el producto con ID: " + idProducto);
+            return ResponseEntity.ok(ventas); // Return sales list
+
+        } catch (DataAccessException e) {
+            log.error("Error al obtener las ventas del producto con ID: {}", idProducto, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno del servidor. Contacte al administrador.");
         }
-
-        return ventas;
     }
 
+    /**
+     * Obtiene una venta por su ID.
+     *
+     * @param idVenta ID de la venta.
+     * @return La venta encontrada.
+     * @throws NoSuchElementException Si no se encuentra la venta.
+     */
 
     @Override
     public Venta findByIdVenta(Long idVenta) {
+        Optional<Venta> ventaOptional = ventaRepository.findById(idVenta);
 
-        Venta venta = ventaRepository.findById(idVenta)
-                .orElseThrow(() -> new NoSuchElementException("Venta no encontrada con ID: " + idVenta));
+        if (!ventaOptional.isPresent()) {
+            throw new NoSuchElementException("Venta no encontrada con ID: " + idVenta);
+        }
 
-
-
-        return venta;
+        return ventaOptional.get();
     }
 
 }

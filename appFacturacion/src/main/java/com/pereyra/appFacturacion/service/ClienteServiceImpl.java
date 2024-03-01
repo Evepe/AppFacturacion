@@ -2,6 +2,8 @@ package com.pereyra.appFacturacion.service;
 import com.pereyra.appFacturacion.dtos.ClienteDto;
 import com.pereyra.appFacturacion.entity.Cliente;
 import com.pereyra.appFacturacion.repository.ClienteRespository;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +22,8 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 
 /**
- * Servicios relacionados con entidad cliente
+ * Servicios relacionados con entidad cliente.
+ * Contiene operaciones CRUD para gestionar clientes.
  */
 @Transactional
 @Service
@@ -30,15 +33,23 @@ public class ClienteServiceImpl implements ClienteService{
     @Autowired
     private ClienteRespository clienteRepository;
 
+    /**
+     * Agrega un nuevo cliente al sistema.
+     *
+     * @param cliente El cliente a agregar.
+     * @return ResponseEntity que indica el resultado de la operación.
+     */
 
     @Override
     public ResponseEntity<String> agregarCliente(Cliente cliente) {
         try {
+            //Validacion del completado de los datos obligatorios
           if (StringUtils.isEmpty(cliente.getNombreCliente()) || StringUtils.isEmpty(cliente.getApellidoCliente()) || cliente.getDniCliente() == 0)  {
               return ResponseEntity.status(HttpStatus.CONFLICT).body("Error al guardar cliente. Complete los campos obligatorios: Nombre, Apellido y DNI.");
           }
+          //Guardado de Cliente en base de datos
             clienteRepository.save(cliente);
-            return ResponseEntity.ok("Cliente agregado correctamente." + "\n" + cliente);
+            return ResponseEntity.status(HttpStatus.OK).body("Cliente agregado correctamente.");
 
            //Manejo de excepciones
         } catch (DataAccessException e) {
@@ -46,6 +57,12 @@ public class ClienteServiceImpl implements ClienteService{
             return ResponseEntity.status(HttpStatus.CONFLICT).body("ERROR INESPERADO. No se pudo agregar el cliente.");
         }
     }
+
+    /**
+     * Obtiene la lista de todos los clientes almacenados en el sistema.
+     *
+     * @return ResponseEntity que contiene la lista de clientes o un mensaje indicando que no hay clientes.
+     */
 
     @Override
     public ResponseEntity<?> mostrarCliente() {
@@ -60,7 +77,13 @@ public class ClienteServiceImpl implements ClienteService{
         }
     }
 
-
+    /**
+     * Modifica los detalles de un cliente existente por su ID.
+     *
+     * @param idCliente ID del cliente a modificar.
+     * @param cliente   Los nuevos detalles del cliente.
+     * @return ResponseEntity que indica el resultado de la operación.
+     */
 
 
     @Override
@@ -86,6 +109,13 @@ public class ClienteServiceImpl implements ClienteService{
         }
     }
 
+    /**
+     * Obtiene un cliente por su ID.
+     *
+     * @param idCliente ID del cliente a obtener.
+     * @return objeto ClienteDto.
+     */
+
     public ClienteDto obtenerClientePorId(Long idCliente) {
         Cliente cliente = clienteRepository.findById(idCliente).orElseThrow(() -> new NoSuchElementException("Cliente con ID " + idCliente + " no encontrado."));
 
@@ -94,21 +124,38 @@ public class ClienteServiceImpl implements ClienteService{
 
         return clienteDto;
     }
+    /**
+     * Obtiene un cliente por su ID.
+     *
+     * @param id ID del cliente a obtener.
+     * @return ResponseEntity que contiene el cliente o un mensaje indicando que el cliente no fue encontrado.
+     */
+
+
     @Override
     public ResponseEntity <?> mostrarClientePorId(Long id) {
         try{
             //Busca al cliente en BD si lo encuentra lo muestra
             Optional <Cliente> clienteOptional= clienteRepository.findById(id);
 
-            return ResponseEntity.status(HttpStatus.OK).body(clienteOptional);
-            //Manejo excepciones
+            if(clienteOptional.isPresent()) {
 
-            } catch (EmptyResultDataAccessException e){
-                return ResponseEntity.status(HttpStatus.OK).body("Cliente con Id: " + id + " no encontrado.");
+                return ResponseEntity.status(HttpStatus.OK).body(clienteOptional);
+            } else{
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cliente con Id: " + id + " no encontrado.");
+            }
+
+            //Manejo de excepciones
         } catch (DataAccessException e){
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Error inesperado. No se puede procesar la peticion.");
         }
     }
+    /**
+     * Elimina un cliente por su ID.
+     *
+     * @param id ID del cliente a eliminar.
+     * @return ResponseEntity que indica el resultado de la operación.
+     */
 
     @Override
     public ResponseEntity<String> eliminarClientePorId(Long id) {
@@ -121,7 +168,7 @@ public class ClienteServiceImpl implements ClienteService{
                 return ResponseEntity.status(HttpStatus.OK).body("Cliente con ID: " + id + " eliminado.");
             }
             else {
-                return ResponseEntity.ok("Cliente con ID: " + id + " no encontrado.");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cliente con ID: " + id + " no encontrado.");
             }
             //Manejo de excepciones
         } catch (DataAccessException e) {
@@ -129,18 +176,25 @@ public class ClienteServiceImpl implements ClienteService{
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Error inesperado. No se pudo procesar la operacion.");
         }
     }
+    /**
+     * Obtiene un cliente por su DNI.
+     *
+     * @param dniCliente ID del cliente a obtener.
+     * @return ResponseEntity que contiene el cliente o un mensaje indicando que el cliente no fue encontrado.
+     */
+
 
     @Override
-    public ResponseEntity<String> buscarClientePorDni(int dniCliente) {
+    public ResponseEntity<?> buscarClientePorDni(int dniCliente) {
         try {
             //Busca cliente en base de datos por su DNI
             Optional<Cliente> clienteOptional = clienteRepository.findByDniCliente(dniCliente);
 
             if (clienteOptional.isPresent()) {
                 Cliente cliente = clienteOptional.get();
-                return ResponseEntity.ok("Cliente encontrado: " + cliente);
+                return ResponseEntity.status(HttpStatus.OK).body(cliente);
             } else {
-                return ResponseEntity.ok("Cliente no encontrado en la base de datos.");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cliente no encontrado en la base de datos.");
             }
             //Manejo excepciones
         } catch (DataAccessException e) {
